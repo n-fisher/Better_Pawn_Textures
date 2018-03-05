@@ -1,7 +1,7 @@
-﻿﻿# Better Pawn Textures
+# Better Pawn Textures
 
 ## Usage
-Use this `.dll` to add custom texture/color pools to animals. See included files for example usage
+Use this `.dll` to add custom texture/color pools to animals. See included files for example usage, copy the Assemblies folder to your mod to make it work!
 
 ### Add Custom Textures
 ##### Usage
