@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+    <Operation Class="PatchOperationAdd">
+        <xpath>/Defs/PawnKindDef[defName="Cat"]/lifeStages/li/bodyGraphicData</xpath>
+        <value>
+            <graphicClass>Better_Pawn_Textures.Graphic</graphicClass>
+        </value>
+    </Operation>
+    
+    <Operation Class="PatchOperationAddModExtension">
+        <xpath>/Defs/PawnKindDef[defName="Cat"]</xpath>
+        <value>
+            <li Class="Better_Pawn_Textures.BPTModExtension">
+                <colors>
+                    <li>(66,134,244)</li>
+                    <li>(182,66,244)</li>
+                    <li>(244,238,66)</li>
+                </colors>
+            </li>
+        </value>
+    </Operation>
+    
+    <!-- ONLY REQUIRED FOR SEPARATE FEMALE GRAPHICS 
+    <Operation Class="PatchOperationReplace">
+        <xpath>/Defs/PawnKindDef[defName="Cat"]/lifeStages/li/femaleGraphicData</xpath>
+        <value>
+            <graphicClass>Better_Pawn_Textures.Graphic</graphicClass>
+        </value>
+    </Operation>-->
+
+    <!--ONLY REQUIRED FOR SEPARATE FEMALE COLORS
+    <Operation Class="PatchOperationAddModExtension">
+        <xpath>/Defs/PawnKindDef[defName="Cat"]/lifeStages/li/femaleGraphicData</xpath>
+        <value>
+            <colors Class="BPTModExtension">
+                <li>(66,134,244)</li>
+                <li>(182,66,244)</li>
+                <li>(244,238,66)</li>
+            </colors>
+        </value>
+    </Operation>-->
+</Patch>
