@@ -22,7 +22,7 @@
     
     <!-- ONLY REQUIRED FOR SEPARATE FEMALE GRAPHICS 
     <Operation Class="PatchOperationReplace">
-        <xpath>/Defs/PawnKindDef[defName="Cat"]/lifeStages/li/femaleGraphicData</xpath>
+        <xpath>/Defs/PawnKindDef[defName="Deer"]/lifeStages/li/femaleGraphicData</xpath>
         <value>
             <graphicClass>Better_Pawn_Textures.Graphic</graphicClass>
         </value>
@@ -30,7 +30,7 @@
 
     <!--ONLY REQUIRED FOR SEPARATE FEMALE COLORS
     <Operation Class="PatchOperationAddModExtension">
-        <xpath>/Defs/PawnKindDef[defName="Cat"]/lifeStages/li/femaleGraphicData</xpath>
+        <xpath>/Defs/PawnKindDef[defName="Deer"]/lifeStages/li/femaleGraphicData</xpath>
         <value>
             <colors Class="BPTModExtension">
                 <li>(66,134,244)</li>

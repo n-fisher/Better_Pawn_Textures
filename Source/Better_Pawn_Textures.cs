@@ -5,6 +5,7 @@ using System.Reflection;
 using System;
 using UnityEngine;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Better_Pawn_Textures
 {
@@ -42,12 +43,10 @@ namespace Better_Pawn_Textures
                     }
                     
                     __instance.nakedGraphic = baseGraphic.GetColoredVersion(ShaderDatabase.CutoutSkin, color, Color.white);
-
-                    //Log.Message("Making a " + color + " " + baseGraphic.GraphicPath.Split('/').Last());
+                    
                     return false;
                 }
             }
-            //Log.Message("Not editing " + __instance.pawn.Label);
             return true;
         }
     }
@@ -59,7 +58,7 @@ namespace Better_Pawn_Textures
             string pathBase = PathBase();
 
             if (path != pathBase) {
-                Log.Warning("Trying to get a random path when a path is already specified.");
+                Debug.Log("Trying to get a random path when a path is already specified.");
                 return path;
             }
 
@@ -73,14 +72,14 @@ namespace Better_Pawn_Textures
                 o = ContentFinder<Texture2D>.Get(pathBase + (count + 1) + "_back", false);
             }
 
-            Log.Message("Found " + count + " custom textures.");
+            Debug.Log("Found " + count + " custom textures.");
             // if any assets have been found choose one randomly, otherwise 
             if (count > 0) {
                 count = UnityEngine.Random.Range(1, count + 1);
                 pathBase += count;
             }
 
-            Log.Message("Chose texture " + count);
+            Debug.Log("Chose texture " + count);
 
             return pathBase;
         }
@@ -92,7 +91,7 @@ namespace Better_Pawn_Textures
                 while (true) {
                     int x = int.Parse(req.Substring(path.Length - 1));
                     // fail on already having a tex number
-                    Log.Message("Trimming " + x);
+                    Debug.Log("Trimming " + x);
                     req = req.Substring(0, req.Length - 1);
                 }
             } catch (FormatException) {
@@ -104,11 +103,10 @@ namespace Better_Pawn_Textures
 
         public override Verse.Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
         {
-            Log.Message("Path hopefully does not have a number: " + path);
+            Debug.Log("Path hopefully does not have a number: " + path);
             path = PathBase();
-            Log.Message("Path should not have a number: " + path);
+            Debug.Log("Path should not have a number: " + path);
             path = RandomPath();
-            //data.texPath = path;
             return GraphicDatabase.Get<Graphic_Multi>(path, newShader, drawSize, newColor, Color.white, data);
         }
     }
@@ -116,5 +114,14 @@ namespace Better_Pawn_Textures
     public class BPTModExtension : DefModExtension
     {
         public readonly List<Color> colors;
+    }
+
+    internal class Debug
+    {
+        [Conditional("DEBUG")]
+        internal static void Log(string s)
+        {
+            Verse.Log.Message(s);
+        }
     }
 }
