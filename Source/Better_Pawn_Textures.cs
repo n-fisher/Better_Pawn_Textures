@@ -29,8 +29,7 @@ namespace Better_Pawn_Textures
                     PawnKindLifeStage curKindLifeStage = __instance.pawn.ageTracker.CurKindLifeStage;
 
                     Debug.Log(curKindLifeStage.ToStringSafe());
-                    Color color = extension.colors.RandomElement();
-                    Debug.Log(color.ToStringSafe());
+
                     Graphic baseGraphic = new Graphic(((pawn.gender == Gender.Female) ?
                         curKindLifeStage.femaleGraphicData?.Graphic ?? curKindLifeStage.bodyGraphicData.Graphic :
                         curKindLifeStage.bodyGraphicData.Graphic));
@@ -39,6 +38,17 @@ namespace Better_Pawn_Textures
                     if (baseGraphic == null) {
                         return true;
                     }
+
+                    int availableTextureCount = Graphic.ModTextureCount(baseGraphic.path);
+                    string safeTextureIndex;
+                    if (availableTextureCount > 0) {
+                        int textureIndex = (new System.Random(pawn.thingIDNumber * 2)).Next() % availableTextureCount;
+                        safeTextureIndex = (1 + textureIndex).ToString();
+                    } else {
+                        safeTextureIndex = "";
+                    }
+                    int colorIndex = (new System.Random(pawn.thingIDNumber)).Next() % extension.colors.Count;
+                    Color color = extension.colors[colorIndex];
 
                     //may spawn packs all default colors
                     if (pawn.RaceProps.packAnimal) {
@@ -51,7 +61,7 @@ namespace Better_Pawn_Textures
                     }
                     Debug.Log(__instance.dessicatedGraphic.ToStringSafe());
 
-                    __instance.nakedGraphic = baseGraphic.GetColoredVersion(ShaderDatabase.CutoutSkin, color, Color.white);
+                    __instance.nakedGraphic = baseGraphic.GetColoredVersion(ShaderDatabase.CutoutSkin, color, safeTextureIndex);
                     Debug.Log(__instance.nakedGraphic.ToStringSafe());
 
                     return false;
@@ -70,13 +80,29 @@ namespace Better_Pawn_Textures
             data = graphic.data;
             color = graphic.color;
             colorTwo = graphic.colorTwo;
+
         }
 
         public Graphic() : base()
         {
         }
 
-        private string RandomPath()
+        public static int ModTextureCount(string path)
+        {
+            // find all assets with custom number tags
+            int count = 0;
+
+            UnityEngine.Object o = ContentFinder<Texture2D>.Get(path + (count + 1) + "_back", false);
+
+            while (o != null) {
+                count++;
+                o = ContentFinder<Texture2D>.Get(path + (count + 1) + "_back", false);
+            }
+
+            return count;
+        }
+
+        private string RandomPath(int thingid)
         {
             string pathBase = PathBase(path);
 
@@ -85,28 +111,19 @@ namespace Better_Pawn_Textures
                 return path;
             }
 
-            // find all assets with custom number tags
-            int count = 0;
+            int textureIndex = ModTextureCount(path);
 
-            UnityEngine.Object o = ContentFinder<Texture2D>.Get(pathBase + (count + 1) + "_back", false);
-            
-            while (o != null) {
-                count++;
-                o = ContentFinder<Texture2D>.Get(pathBase + (count + 1) + "_back", false);
-            }
+            Debug.Log("Found " + textureIndex + " custom textures.");
 
-            Debug.Log("Found " + count + " custom textures.");
-            // if any assets have been found choose one randomly, otherwise 
-            if (count > 0) {
-                count = UnityEngine.Random.Range(1, count + 1);
-                pathBase += count;
-            }
+            textureIndex = (thingid % textureIndex) + 1;
 
-            Debug.Log("Chose texture " + count);
+            Debug.Log("Chose texture " + textureIndex);
+
+            pathBase += textureIndex;
 
             return pathBase;
         }
-        
+
         internal static string PathBase(string req)
         {
             try {
@@ -123,12 +140,13 @@ namespace Better_Pawn_Textures
             return req;
         }
 
-        public override Verse.Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
+        public Verse.Graphic GetColoredVersion(Shader newShader, Color newColor, string textureIndex)
         {
             Debug.Log("Path hopefully does not have a number: " + path);
             path = PathBase(path);
             Debug.Log("Path should not have a number: " + path);
-            return GraphicDatabase.Get<Graphic_Multi>(RandomPath(), newShader, drawSize, newColor, Color.white, data);
+            path += textureIndex;
+            return GraphicDatabase.Get<Graphic_Multi>(path, newShader, drawSize, newColor, Color.white, data);
         }
     }
 
