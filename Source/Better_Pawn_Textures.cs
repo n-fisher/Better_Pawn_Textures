@@ -4,7 +4,6 @@ using Harmony;
 using System.Reflection;
 using System;
 using UnityEngine;
-using System.Linq;
 using System.Diagnostics;
 
 namespace Better_Pawn_Textures
@@ -25,25 +24,36 @@ namespace Better_Pawn_Textures
         {
             if (__instance.pawn.RaceProps.Animal) {
                 if (__instance.pawn.kindDef.GetModExtension<BPTModExtension>() is BPTModExtension extension) {
+                    __instance.ClearCache();
                     Pawn pawn = __instance.pawn;
                     PawnKindLifeStage curKindLifeStage = __instance.pawn.ageTracker.CurKindLifeStage;
 
+                    Debug.Log(curKindLifeStage.ToStringSafe());
                     Color color = extension.colors.RandomElement();
-                    Graphic baseGraphic = (Graphic) ((pawn.gender == Gender.Female) ?
+                    Debug.Log(color.ToStringSafe());
+                    Graphic baseGraphic = new Graphic(((pawn.gender == Gender.Female) ?
                         curKindLifeStage.femaleGraphicData?.Graphic ?? curKindLifeStage.bodyGraphicData.Graphic :
-                        curKindLifeStage.bodyGraphicData.Graphic);
+                        curKindLifeStage.bodyGraphicData.Graphic));
+
+                    Debug.Log(baseGraphic.ToStringSafe());
+                    if (baseGraphic == null) {
+                        return true;
+                    }
 
                     //may spawn packs all default colors
                     if (pawn.RaceProps.packAnimal) {
-                        __instance.packGraphic = GraphicDatabase.Get<Graphic_Multi>(__instance.nakedGraphic.path + "Pack", ShaderDatabase.Cutout, __instance.nakedGraphic.drawSize, color);
+                        __instance.packGraphic = GraphicDatabase.Get<Graphic_Multi>(Graphic.PathBase(baseGraphic.path) + "Pack", ShaderDatabase.Cutout, baseGraphic.drawSize, color);
                     }
+                    Debug.Log(__instance.packGraphic.ToStringSafe());
 
                     if (curKindLifeStage.dessicatedBodyGraphicData is GraphicData dessicated) {
                         __instance.dessicatedGraphic = dessicated.GraphicColoredFor(__instance.pawn);
                     }
-                    
+                    Debug.Log(__instance.dessicatedGraphic.ToStringSafe());
+
                     __instance.nakedGraphic = baseGraphic.GetColoredVersion(ShaderDatabase.CutoutSkin, color, Color.white);
-                    
+                    Debug.Log(__instance.nakedGraphic.ToStringSafe());
+
                     return false;
                 }
             }
@@ -53,9 +63,22 @@ namespace Better_Pawn_Textures
 
     public class Graphic : Graphic_Multi
     {
+        public Graphic(Verse.Graphic graphic)
+        {
+            path = graphic.path;
+            drawSize = graphic.drawSize;
+            data = graphic.data;
+            color = graphic.color;
+            colorTwo = graphic.colorTwo;
+        }
+
+        public Graphic() : base()
+        {
+        }
+
         private string RandomPath()
         {
-            string pathBase = PathBase();
+            string pathBase = PathBase(path);
 
             if (path != pathBase) {
                 Debug.Log("Trying to get a random path when a path is already specified.");
@@ -84,12 +107,11 @@ namespace Better_Pawn_Textures
             return pathBase;
         }
         
-        private string PathBase()
+        internal static string PathBase(string req)
         {
-            string req = path;
             try {
                 while (true) {
-                    int x = int.Parse(req.Substring(path.Length - 1));
+                    int x = int.Parse(req.Substring(req.Length - 1));
                     // fail on already having a tex number
                     Debug.Log("Trimming " + x);
                     req = req.Substring(0, req.Length - 1);
@@ -104,10 +126,9 @@ namespace Better_Pawn_Textures
         public override Verse.Graphic GetColoredVersion(Shader newShader, Color newColor, Color newColorTwo)
         {
             Debug.Log("Path hopefully does not have a number: " + path);
-            path = PathBase();
+            path = PathBase(path);
             Debug.Log("Path should not have a number: " + path);
-            path = RandomPath();
-            return GraphicDatabase.Get<Graphic_Multi>(path, newShader, drawSize, newColor, Color.white, data);
+            return GraphicDatabase.Get<Graphic_Multi>(RandomPath(), newShader, drawSize, newColor, Color.white, data);
         }
     }
 
