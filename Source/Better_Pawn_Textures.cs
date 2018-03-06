@@ -23,49 +23,65 @@ namespace Better_Pawn_Textures
         public static bool Prefix(PawnGraphicSet __instance)
         {
             if (__instance.pawn.RaceProps.Animal) {
+                bool isCustom = false;
+                Pawn pawn = __instance.pawn;
+                PawnKindLifeStage curKindLifeStage = __instance.pawn.ageTracker.CurKindLifeStage;
+
+                Graphic baseGraphic = new Graphic(((pawn.gender == Gender.Female) ?
+                    curKindLifeStage.femaleGraphicData?.Graphic ?? curKindLifeStage.bodyGraphicData.Graphic :
+                    curKindLifeStage.bodyGraphicData.Graphic));
+                
+                if (baseGraphic is null) {
+                    Debug.Log("Basegraphic for " + pawn.ThingID + " null");
+                    return true;
+                }
+                Color color = baseGraphic.color;
+                /*if (baseGraphic.Shader.name != ShaderType.Cutout.ToString()) {
+                    Log.Error("boutta override " + pawn.Label + "'s " + baseGraphic.Shader.name + " with cutoutskin :(");
+                }*/
+                ShaderType shader = ShaderType.Cutout;
+
+                //has custom colors
+                Debug.Log("Checking custom color " + pawn.Label);
                 if (__instance.pawn.kindDef.GetModExtension<BPTModExtension>() is BPTModExtension extension) {
-                    __instance.ClearCache();
-                    Pawn pawn = __instance.pawn;
-                    PawnKindLifeStage curKindLifeStage = __instance.pawn.ageTracker.CurKindLifeStage;
+                    isCustom = true;
+                    int colorIndex = (new System.Random(pawn.thingIDNumber)).Next() % extension.colors.Count;
+                    color = extension.colors[colorIndex];
+                    shader = extension.shaderType;
+                    Debug.Log("chose special color " + color + " with shader " + shader);
+                }
 
-                    Debug.Log(curKindLifeStage.ToStringSafe());
-
-                    Graphic baseGraphic = new Graphic(((pawn.gender == Gender.Female) ?
-                        curKindLifeStage.femaleGraphicData?.Graphic ?? curKindLifeStage.bodyGraphicData.Graphic :
-                        curKindLifeStage.bodyGraphicData.Graphic));
-
-                    Debug.Log(baseGraphic.ToStringSafe());
-                    if (baseGraphic == null) {
-                        return true;
-                    }
-
+                string safeTextureIndex = "";
+                //has custom texture
+                Debug.Log("Checking custom texture " + pawn.Label);
+                if (__instance.pawn.ageTracker.CurKindLifeStage.bodyGraphicData.graphicClass == typeof(Graphic)) {
+                    isCustom = true;
                     int availableTextureCount = Graphic.ModTextureCount(baseGraphic.path);
-                    string safeTextureIndex;
                     if (availableTextureCount > 0) {
                         int textureIndex = (new System.Random(pawn.thingIDNumber * 2)).Next() % availableTextureCount;
                         safeTextureIndex = (1 + textureIndex).ToString();
-                    } else {
-                        safeTextureIndex = "";
                     }
-                    int colorIndex = (new System.Random(pawn.thingIDNumber)).Next() % extension.colors.Count;
-                    Color color = extension.colors[colorIndex];
+                    Debug.Log("chose texture " + safeTextureIndex);
+                }
 
-                    //may spawn packs all default colors
-                    if (pawn.RaceProps.packAnimal) {
-                        __instance.packGraphic = GraphicDatabase.Get<Graphic_Multi>(Graphic.PathBase(baseGraphic.path) + "Pack", ShaderDatabase.Cutout, baseGraphic.drawSize, color);
-                    }
-                    Debug.Log(__instance.packGraphic.ToStringSafe());
+
+                if (isCustom) {
+                    __instance.ClearCache();
 
                     if (curKindLifeStage.dessicatedBodyGraphicData is GraphicData dessicated) {
                         __instance.dessicatedGraphic = dessicated.GraphicColoredFor(__instance.pawn);
                     }
-                    Debug.Log(__instance.dessicatedGraphic.ToStringSafe());
-
-                    __instance.nakedGraphic = baseGraphic.GetColoredVersion(ShaderDatabase.CutoutSkin, color, safeTextureIndex);
-                    Debug.Log(__instance.nakedGraphic.ToStringSafe());
-
+                    
+                    //may spawn packs all default colors
+                    if (pawn.RaceProps.packAnimal) {
+                        __instance.packGraphic = GraphicDatabase.Get<Graphic_Multi>(Graphic.PathBase(baseGraphic.path) + "Pack", ShaderDatabase.ShaderFromType(shader), baseGraphic.drawSize, color);
+                    }
+                    __instance.nakedGraphic = (new Graphic(baseGraphic)).GetColoredVersion(ShaderDatabase.ShaderFromType(shader), color, safeTextureIndex);
+                    Debug.Log("Resolved " + __instance.nakedGraphic);
                     return false;
                 }
+
+                return true;
             }
             return true;
         }
@@ -153,6 +169,7 @@ namespace Better_Pawn_Textures
     public class BPTModExtension : DefModExtension
     {
         public readonly List<Color> colors;
+        public readonly ShaderType shaderType;
     }
 
     internal class Debug

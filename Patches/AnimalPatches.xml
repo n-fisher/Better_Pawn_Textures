@@ -7,6 +7,13 @@
         </value>
     </Operation>
     
+    <Operation Class="PatchOperationAdd">
+        <xpath>/Defs/PawnKindDef[defName="Alpaca"]/lifeStages/li/bodyGraphicData</xpath>
+        <value>
+            <graphicClass>Better_Pawn_Textures.Graphic</graphicClass>
+        </value>
+    </Operation>
+    
     <Operation Class="PatchOperationAddModExtension">
         <xpath>/Defs/PawnKindDef[defName="Cat"]</xpath>
         <value>
@@ -16,10 +23,34 @@
                     <li>(182,66,244)</li>
                     <li>(244,238,66)</li>
                 </colors>
+                <shaderType>CutoutSkin</shaderType>
             </li>
         </value>
     </Operation>
     
+    <Operation Class="PatchOperationAddModExtension">
+        <xpath>/Defs/PawnKindDef[defName="Alpaca"]</xpath>
+        <value>
+            <li Class="Better_Pawn_Textures.BPTModExtension">
+                <colors>
+                    <li>(235,230,200)</li>
+                    <li>(220,195,165)</li>
+                    <li>(185,160,130)</li>
+                    <li>(135,100,75)</li>
+                    <li>(120,90,60)</li>
+                    <li>(65,40,30)</li>
+                    <li>(45,35,30)</li>
+                    <li>(35,31,27)</li>
+                    <li>(160,150,140)</li>
+                    <li>(90,85,80)</li>
+                    <li>(60,50,45)</li>
+                    <li>(120,90,65)</li>
+                    <li>(100,85,80)</li>
+                </colors>
+                <shaderType>CutoutComplex</shaderType>
+            </li>
+        </value>
+    </Operation>
     <!-- ONLY REQUIRED FOR SEPARATE FEMALE GRAPHICS 
     <Operation Class="PatchOperationReplace">
         <xpath>/Defs/PawnKindDef[defName="Deer"]/lifeStages/li/femaleGraphicData</xpath>
