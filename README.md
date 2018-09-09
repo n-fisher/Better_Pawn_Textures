@@ -16,7 +16,7 @@ Use this `.dll` to add custom texture/color pools to animals. See included files
 </Patch>
 ```
 
-IMPORTANT: Add `AnimalName_front`, `AnimalName_side`, and `AnimalName_back` versions to `Textures/Pawn/Animal/AnimalName/`
+IMPORTANT: Add `AnimalName_south`, `AnimalName_east`, and `AnimalName_north` versions to `Textures/Pawn/Animal/AnimalName/`
 
 ##### Example
 ```xml 
@@ -44,6 +44,7 @@ IMPORTANT: Add `AnimalName_front`, `AnimalName_side`, and `AnimalName_back` vers
                     <!-- ... -->
                     <li><!-- ColorN --></li>
                 </colors>
+                <shaderType><!-- Shader type from ShaderDatabase --></shaderType>
             </li>
         </value>
     </Operation>
@@ -62,6 +63,7 @@ IMPORTANT: Add `AnimalName_front`, `AnimalName_side`, and `AnimalName_back` vers
                     <li>(182,66,244)</li>
                     <li>(244,238,66)</li>
                 </colors>
+                <shaderType>CutoutSkin</shaderType>
             </li>
         </value>
     </Operation>
@@ -88,6 +90,7 @@ IMPORTANT: Add `AnimalName_front`, `AnimalName_side`, and `AnimalName_back` vers
                     <li>(182,66,244)</li>
                     <li>(244,238,66)</li>
                 </colors>
+                <shaderType>CutoutSkin</shaderType>
             </li>
         </value>
     </Operation>

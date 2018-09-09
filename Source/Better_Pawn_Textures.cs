@@ -39,16 +39,21 @@ namespace Better_Pawn_Textures
                 /*if (baseGraphic.Shader.name != ShaderType.Cutout.ToString()) {
                     Log.Error("boutta override " + pawn.Label + "'s " + baseGraphic.Shader.name + " with cutoutskin :(");
                 }*/
-                ShaderType shader = ShaderType.Cutout;
-
+                Shader shader = ShaderDatabase.Cutout;
                 //has custom colors
                 Debug.Log("Checking custom color " + pawn.Label);
+
                 if (__instance.pawn.kindDef.GetModExtension<BPTModExtension>() is BPTModExtension extension) {
                     isCustom = true;
                     int colorIndex = (new System.Random(pawn.thingIDNumber)).Next() % extension.colors.Count;
                     color = extension.colors[colorIndex];
-                    shader = extension.shaderType;
+                    FieldInfo fieldInfo = typeof(ShaderDatabase).GetField(extension.shaderType, BindingFlags.Static | BindingFlags.Public);
+                    shader = (Shader)fieldInfo.GetValue(null);
                     Debug.Log("chose special color " + color + " with shader " + shader);
+                    Debug.Log(typeof(ShaderDatabase).GetFields(BindingFlags.Static | BindingFlags.Public).ToStringSafeEnumerable());
+                }
+                else {
+                    Debug.Log(__instance.pawn.kindDef.GetModExtension<BPTModExtension>().ToStringSafe());
                 }
 
                 string safeTextureIndex = "";
@@ -74,9 +79,10 @@ namespace Better_Pawn_Textures
                     
                     //may spawn packs all default colors
                     if (pawn.RaceProps.packAnimal) {
-                        __instance.packGraphic = GraphicDatabase.Get<Graphic_Multi>(Graphic.PathBase(baseGraphic.path) + "Pack", ShaderDatabase.ShaderFromType(shader), baseGraphic.drawSize, color);
+                        Debug.Log("pack animal with shader:" + shader.ToStringSafe() + color.ToStringSafe());
+                        __instance.packGraphic = GraphicDatabase.Get<Graphic_Multi>(Graphic.PathBase(baseGraphic.path) + "Pack", shader, baseGraphic.drawSize, color);
                     }
-                    __instance.nakedGraphic = (new Graphic(baseGraphic)).GetColoredVersion(ShaderDatabase.ShaderFromType(shader), color, safeTextureIndex);
+                    __instance.nakedGraphic = (new Graphic(baseGraphic)).GetColoredVersion(shader, color, safeTextureIndex);
                     Debug.Log("Resolved " + __instance.nakedGraphic);
                     return false;
                 }
@@ -96,7 +102,6 @@ namespace Better_Pawn_Textures
             data = graphic.data;
             color = graphic.color;
             colorTwo = graphic.colorTwo;
-
         }
 
         public Graphic() : base()
@@ -108,11 +113,11 @@ namespace Better_Pawn_Textures
             // find all assets with custom number tags
             int count = 0;
 
-            UnityEngine.Object o = ContentFinder<Texture2D>.Get(path + (count + 1) + "_back", false);
+            UnityEngine.Object o = ContentFinder<Texture2D>.Get(path + (count + 1) + "_north", false);
 
             while (o != null) {
                 count++;
-                o = ContentFinder<Texture2D>.Get(path + (count + 1) + "_back", false);
+                o = ContentFinder<Texture2D>.Get(path + (count + 1) + "_north", false);
             }
 
             return count;
@@ -169,7 +174,7 @@ namespace Better_Pawn_Textures
     public class BPTModExtension : DefModExtension
     {
         public readonly List<Color> colors;
-        public readonly ShaderType shaderType;
+        public readonly string shaderType;
     }
 
     internal class Debug
